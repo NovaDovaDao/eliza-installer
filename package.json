@@ -5,10 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vue-tsc --noEmit && vite build",
-    "preview": "vite preview",
-    "tauri": "tauri dev",
-    "bundle:mac": "tauri build --bundles dmg"
+    "build": "tsc && vite build",
+    "bundle": "tauri build --bundles dmg",
+    "tauri": "tauri dev"
   },
   "dependencies": {
     "@tailwindcss/forms": "^0.5.10",
