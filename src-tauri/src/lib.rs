@@ -42,7 +42,10 @@ fn check_wsl2_installed() -> Result<bool, String> {
                 Ok(stdout.contains("WSL 2"))
             } else {
                 let stderr = String::from_utf8_lossy(&output.stderr).trim().to_string();
-                Err(format!("Failed to execute 'wsl --list --verbose': {}", stderr))
+                Err(format!(
+                    "Failed to execute 'wsl --list --verbose': {}",
+                    stderr
+                ))
             }
         }
         Err(e) => Err(format!("Error running 'wsl --list --verbose': {}", e)),
@@ -56,32 +59,19 @@ fn check_wsl2_installed() -> Result<bool, String> {
     Ok(true)
 }
 
-#[tauri::command]
-fn execute_npm_command_in_dir(command: String, directory: String) -> Result<(), String> {
-    let parts: Vec<&str> = command.split_whitespace().collect();
-    if parts.is_empty() {
-        return Err("Empty command provided".into());
-    }
-    let program = parts[0];
-    let args = &parts[1..];
-    let install_path = std::path::Path::new(&directory);
-
-    match Command::new(program).args(args).current_dir(install_path).spawn() {
-        Ok(mut _child) => {
-            println!("Spawned command: {} in directory: {}", command, directory);
-            Ok(())
-        }
-        Err(e) => Err(format!("Failed to execute command '{}' in directory '{}': {}", command, directory, e)),
-    }
-}
-
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![greet, is_eliza_initiated, check_node_version, check_wsl2_installed, execute_npm_command_in_dir])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            is_eliza_initiated,
+            check_node_version,
+            check_wsl2_installed
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
